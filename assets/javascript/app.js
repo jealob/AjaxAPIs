@@ -15,8 +15,7 @@ $(document).ready(function () {
         $("#buttons").empty();
         for (let button in buttons) {
             // Style with Bootstrap
-            let newBtn = $("<button type='button' class='btn btn-default btn-xs mx-1 gifs-button'>");
-            newBtn.text(buttons[button]);
+            let newBtn = $("<button type='button' class='btn btn-default btn-xs mx-1 gifs-button'>").text(buttons[button]);
             $(".buttons").append(newBtn);
         }
         // For animation when hovered
@@ -40,5 +39,22 @@ $(document).ready(function () {
         });
     };
 
-   
+    function apiQuery() {
+        // Get api query URL 
+        let gifs = $(this).text();
+        let queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+        gifs + "&api_key=dc6zaTOxFJmzC&limit=10";
+        // Perform the AJAX GET request
+        $.ajax ({
+            url: queryURL,
+            method: "GET"
+        })
+        // Query response from the API
+        .then(function(response){
+            console.log(response);
+        })
+     }
+
+    $(".buttons").on("click", ".gifs-button", apiQuery); 
+
 })
