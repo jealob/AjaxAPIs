@@ -50,7 +50,10 @@ body {
 h1,h2,h3 {
     font-family: 'Hi Melody', cursive;
 }
-
+.gifs-item {
+    /* position: relative; */
+    
+  }
 /* .buttons button {
     height:auto;
     color: #334455;
