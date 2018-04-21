@@ -7,26 +7,26 @@
 // Document Ready
 $(document).ready(function () {
     // Declare global variables
-    let buttons = ["World up", "好好学习"];
+    let buttons = ["World Cup", "早上好"];
     let gifsCat;
     let limit = 10;
-    // Render Page -- Display Existing Buttons
-    renderButtons();
 
+    // Render Page -- Display Current Buttons
+    renderButtons();
 
     function renderButtons() {
         $(".buttons").empty();
         $(".add-button").empty();
         for (let button in buttons) {
             // Style with Bootstrap
-            let newBtn = $("<button type='button' class='btn btn-success btn-xs mx-1 gifs-button'>").text(buttons[button]);
+            let newBtn = $("<button type='button' class='btn btn-success btn-xs mx-1 mb-1 gifs-button'>").text(buttons[button]);
             $(".buttons").append(newBtn);
         }
         // Animate gifs button when hovered
         $(".gifs-button").hover(function () {
-            $(this).attr('class', 'btn btn-primary btn-xs mx-1 gifs-button');
+            $(this).attr('class', 'btn btn-primary btn-xs mx-1 mb-1 gifs-button');
         }, function () {
-            $(this).attr('class', 'btn btn-success btn-xs mx-1 gifs-button');
+            $(this).attr('class', 'btn btn-success btn-xs mx-1 mb-1 gifs-button');
         })
 
         let addText = $("<input type='text' class='form-control mb-2'  id = 'text-input' placeholder='Enter New GIF Topic'>");
@@ -73,7 +73,6 @@ $(document).ready(function () {
         })
             // Query response from the API
             .then(function (response) {
-                console.log(response);
                 let gifData = response.data;
                 renderGIFs(gifData);
             })
@@ -84,46 +83,56 @@ $(document).ready(function () {
         let gifsTag = $("<h3>");
         for (let gif in data) {
             // Only taking action if the photo has an appropriate rating
-            // if (data[gif].rating !== "r" && data[gif].rating !== "pg-13") {
-            let rating = $("<p>").text("Rating: " + data[gif].rating);
-            let title = $("<h6>").text((data[gif].title).substring(0, 27));
-            let image = $("<img>").attr({ src: data[gif].images.fixed_width_small_still.url, 'id': 'gif-image', 'data-still': data[gif].images.fixed_width_small_still.url, 'data-animate': data[gif].images.fixed_width_small.url, 'data-state': 'still' });
-            let download = $("<button type='button' class='btn btn-success btn-xs mb-1 mr-1 download-button'>").text("download");
-            download.attr({ 'id': gif, 'data-download': data[gif].images.downsized_large.url });
-            let favorite = $("<button class= favorite>");
-            // {'data-favorite': 'fa fa-heart'} .css({})
-            // Virtually create container div and style with css
-            let gifsDiv = $("<div class = 'gif'>")
-                .css({
-                    'position': 'relative',
-                    'float': 'left',
-                    'width': '250',
-                    'min-height': '3%',
-                    'max-height': '30%%',
-                    'margin': '10px',
-                    'overflow': 'hidden',
-                    'border': 'solid 1px gray',
-                    'border-radius': '5px',
-                });
+            if (data[gif].rating !== "r" && data[gif].rating !== "pg-13") {
+                let rating = $("<p>").text("Rating: " + data[gif].rating);
+                let title = $("<h6>").text((data[gif].title).substring(0, 27));
+                let image = $("<img>").attr({ src: data[gif].images.fixed_width_small_still.url, 'id': 'gif-image', 'data-still': data[gif].images.fixed_width_small_still.url, 'data-animate': data[gif].images.fixed_width_small.url, 'data-state': 'still' });
+                let download = $("<button type='button' class='btn btn-success btn-xs  mr-1 download-button'>").text("download");
+                download.attr({ 'id': gif, 'data-download': data[gif].images.downsized_large.url });
+                // let add = $("<button type='button' class='btn btn-success btn-xs  mr-1 add-favorite'>").text("add");
+                // add.attr({ 'id': gif, 'data-download': data[gif].images.downsized_large.url });
+                // Virtually create container div and style with css
+                let gifsDiv = $("<div class = 'gif'>")
+                    .css({
+                        'position': 'relative',
+                        'float': 'left',
+                        'width': '200',
+                        'height': '200',
+                        'margin': '10px',
+                        'overflow': 'auto',
+                        'border': 'solid 1px gray',
+                        'border-radius': '5px',
+                    });
 
-            // Appending the gifs properties to the virtually declared gifsDiv
-            gifsDiv.append(title, image, rating, download, favorite);
-            // Prepend the virtual gif gifsDiv to the html div gif-item ready to render.
-            gifsDiv.prependTo($(".gifs-item"));
-            // }
+                // Appending the gifs properties to the virtually declared gifsDiv
+                gifsDiv.append(title, image, rating, download);   //, add
+                // Prepend the virtual gif gifsDiv to the html div gif-item ready to render.
+                gifsDiv.prependTo($(".gifs-item"));
+            }
         }
         gifsTag.text(gifsCat + " Gifs");
         $(".gifs-item-header").html(gifsTag);
-        // Animate download button when hovered
+
+        // Animate add-favorite button when hovered
+        $(".add-favorite").hover(function () {
+            $(this).attr('class', 'btn btn-primary btn-xs mb-1 mr-1 download-button');
+        }, function () {
+            $(this).attr('class', 'btn btn-success btn-xs mb-1 mr-1 download-button');
+        });
+
+        // Animate add button when hovered
         $(".download-button").hover(function () {
             $(this).attr('class', 'btn btn-primary btn-xs mb-1 mr-1 download-button');
         }, function () {
             $(this).attr('class', 'btn btn-success btn-xs mb-1 mr-1 download-button');
         });
+
+
         // download button "on click" call back
         $(".download-button").on("click", function (event) {
             event.preventDefault();
             window.open($(this).attr('data-download'), '_blank');
+            // console.log($(this).parent().html());
         });
     } //Ends
 
@@ -152,5 +161,77 @@ $(document).ready(function () {
         buttons.push($("#text-input").val().trim());
         renderButtons();
     });
-
 })
+
+
+
+
+// LocalStorage implementation for favorite not quite finished
+// Get favorite array from local storage and parse it as a string
+    // let favListTemp = JSON.parse(localStorage.getItem("favorite"));
+
+    // // Check if favListIn is indeed an array if not create such array 
+    // if (!Array.isArray(favListTemp)) {
+    //     favListTemp = [];
+    // }
+
+     // function renderFavorite() {
+    //     let favListIn = JSON.parse(localStorage.getItem("favorite"));
+
+    //     // Check if favListIn is indeed an array if not create such array 
+    //     if (!Array.isArray(favListIn)) {
+    //         favListIn = [];
+    //     }
+
+    //     for (let i = 0; i < favListIn.length; i++) {
+    //         $("#favorite").prepend(favListIn[i]);
+    //     }
+
+    // }
+
+    // $(".favorite").on("click", "remove-favorite", function () {
+    //     let favListCur = JSON.parse(localStorage.getItem("favorite"));
+    //     let currentIndex = $(this).attr("data-index");
+
+    //     // Remove the favorite marked for deletion
+    //     favListCur.splice(currentIndex, 1);
+    //     favListTemp = favListCur;
+
+    //     localStorage.setItem("favorite", JSON.stringify(favListCur));
+    //     renderFavorite();
+    // });
+
+    // remove favorite "on click" call back event handler
+    // $(".remove-favorite").on("click", function () {
+    //     console.log($(this).parent());
+    //     $(this).parent().empty();
+    // });
+
+
+    // add favorite "on click" call back event handler
+    // $(".add-favorite").on("click", function (event) {
+    //     event.preventDefault();
+
+    //     let fav = $(this).parent().html();
+    //     console.log($(this));
+    //     let remove = $("<button class = 'remove-favorite'>").text('remove');
+    //     // Virtually create container div and style with css
+    //     let favDiv = $("<div class = 'fav'>")
+    //         .css({
+    //             'position': 'relative',
+    //             'float': 'left',
+    //             'width': '200',
+    //             'height': '200',
+    //             'margin': '10px',
+    //             'overflow': 'auto',
+    //             'border': 'solid 1px gray',
+    //             'border-radius': '5px',
+    //         });
+
+    //     favDiv.append($(this).parent().html());
+    //     favDiv.append(remove);
+    //     $(".favorite").prepend(favDiv);
+    //     favListTemp.push(favDiv);
+    //     localStorage.setItem("favorite", JSON.stringify(favListTemp));
+    //     renderFavorite();
+    // });
