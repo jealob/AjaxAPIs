@@ -7,48 +7,66 @@
 // Document Ready
 $(document).ready(function () {
     // Declare global variables
-    let buttons = ["space", "world cup"];
+    let buttons = ["World up", "好好学习"];
+    let gifsCat;
+    let limit = 10;
     // Render Page -- Display Existing Buttons
     renderButtons();
-    
+
 
     function renderButtons() {
         $(".buttons").empty();
         $(".add-button").empty();
         for (let button in buttons) {
             // Style with Bootstrap
-            let newBtn = $("<button type='button' class='btn btn-default btn-xs mx-1 gifs-button'>").text(buttons[button]);
+            let newBtn = $("<button type='button' class='btn btn-success btn-xs mx-1 gifs-button'>").text(buttons[button]);
             $(".buttons").append(newBtn);
         }
-        // For animation when hovered
+        // Animate gifs button when hovered
         $(".gifs-button").hover(function () {
             $(this).attr('class', 'btn btn-primary btn-xs mx-1 gifs-button');
         }, function () {
-            $(this).attr('class', 'btn btn-default btn-xs mx-1 gifs-button');
+            $(this).attr('class', 'btn btn-success btn-xs mx-1 gifs-button');
         })
 
-        let addText = $("<input type='text' class='form-control mb-2'  id = 'text-input' placeholder='Enter New Category'>");
+        let addText = $("<input type='text' class='form-control mb-2'  id = 'text-input' placeholder='Enter New GIF Topic'>");
         //Style with Bootstrap
-        let addBtn = $("<input class = 'btn btn-default btn-xs mb-2 add-button' id = 'add-button' type = 'submit' value ='Add Button'>").text('Add Button');;
+        let addBtn = $("<input class = 'btn btn-success btn-xs mb-2' id = 'add-input' type = 'submit' value ='Add Button'>").text('Add Button');;
         $(".add-button").append(addText);
         $(".add-button").append(addBtn);
 
-        // For animation when hovered
-        $("#add-button").hover(function () {
+        // Animate add button when hovered
+        $("#add-input").hover(function () {
             $(this).attr('class', 'btn btn-primary btn-xs btn-xs mb-2 add-button');
         }, function () {
-            $(this).attr('class', 'btn btn-default btn-xs btn-xs mb-2 add-button');
+            $(this).attr('class', 'btn btn-success btn-xs btn-xs mb-2 add-button');
         });
     };
 
     // Query API
     function apiQuery() {
-        $(".gifs-item").empty();
-        // Get api query URL 
-        let gifsCat = $(this).text();
-        let queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-            gifsCat + "&api_key=dc6zaTOxFJmzC&limit=10";
-        // Perform the AJAX GET request
+        let queryURL;
+        // To get more gif on subsequent clicks 
+        if (gifsCat === $(this).text()) {
+            $(".gifs-item").empty();
+            // ensure limit not more than 30
+            if (limit < 25) {
+                limit += 5;
+            }
+            // Get api query URL
+            gifsCat = $(this).text();
+            queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                gifsCat + "&api_key=dc6zaTOxFJmzC&limit=" + limit;
+        }
+        else {
+            limit = 10;
+            $(".gifs-item").empty();
+            // Get api query URL 
+            gifsCat = $(this).text();
+            queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                gifsCat + "&api_key=dc6zaTOxFJmzC&limit=" + limit;
+        }
+        // Perform the AJAX GET request   
         $.ajax({
             url: queryURL,
             method: "GET"
@@ -63,32 +81,50 @@ $(document).ready(function () {
 
     // Render GIFS
     function renderGIFs(data) {
-        for (let gif = 0; gif < data.length; gif++) {
+        let gifsTag = $("<h3>");
+        for (let gif in data) {
+            // Only taking action if the photo has an appropriate rating
+            // if (data[gif].rating !== "r" && data[gif].rating !== "pg-13") {
             let rating = $("<p>").text("Rating: " + data[gif].rating);
-            let title = $("<p>").text((data[gif].title).substring(0, 27));
-            let image = $("<img>").attr({ src: data[gif].images.fixed_width_small_still.url });
-            image.attr({ 'id': 'gif-image', 'data-still': data[gif].images.fixed_width_small_still.url, 'data-animate': data[gif].images.fixed_width_small.url, 'data-state': 'still'});
-            
+            let title = $("<h6>").text((data[gif].title).substring(0, 27));
+            let image = $("<img>").attr({ src: data[gif].images.fixed_width_small_still.url, 'id': 'gif-image', 'data-still': data[gif].images.fixed_width_small_still.url, 'data-animate': data[gif].images.fixed_width_small.url, 'data-state': 'still' });
+            let download = $("<button type='button' class='btn btn-success btn-xs mb-1 mr-1 download-button'>").text("download");
+            download.attr({ 'id': gif, 'data-download': data[gif].images.downsized_large.url });
+            let favorite = $("<button class= favorite>");
+            // {'data-favorite': 'fa fa-heart'} .css({})
             // Virtually create container div and style with css
             let gifsDiv = $("<div class = 'gif'>")
                 .css({
                     'position': 'relative',
                     'float': 'left',
                     'width': '250',
-                    'line-length': '1.0x',
+                    'min-height': '3%',
+                    'max-height': '30%%',
                     'margin': '10px',
                     'overflow': 'hidden',
-                    'min-height': '3%',
-                    'max-height': '3%',
                     'border': 'solid 1px gray',
                     'border-radius': '5px',
                 });
+
             // Appending the gifs properties to the virtually declared gifsDiv
-            gifsDiv.append(title, image, rating);
+            gifsDiv.append(title, image, rating, download, favorite);
             // Prepend the virtual gif gifsDiv to the html div gif-item ready to render.
-            gifsDiv.appendTo($(".gifs-item"));
+            gifsDiv.prependTo($(".gifs-item"));
             // }
         }
+        gifsTag.text(gifsCat + " Gifs");
+        $(".gifs-item-header").html(gifsTag);
+        // Animate download button when hovered
+        $(".download-button").hover(function () {
+            $(this).attr('class', 'btn btn-primary btn-xs mb-1 mr-1 download-button');
+        }, function () {
+            $(this).attr('class', 'btn btn-success btn-xs mb-1 mr-1 download-button');
+        });
+        // download button "on click" call back
+        $(".download-button").on("click", function (event) {
+            event.preventDefault();
+            window.open($(this).attr('data-download'), '_blank');
+        });
     } //Ends
 
     // Animate  GIFs
@@ -104,18 +140,17 @@ $(document).ready(function () {
         }
     }//Ends
 
-    // gif buttons on click call back event handler
+    // gif buttons "on click" call back event handler
     $(".buttons").on("click", ".gifs-button", apiQuery);
 
-    // gif image on click call back event handler
+    // gif image "on click" call back event handler
     $(".gifs-item").on("click", "#gif-image", animate);
 
-    // gif buttons on click call back event handler
-    $(".add-button").on("click", "#add-button", function (event) {
+    // add new buttons "on click" call back event handler
+    $(".add-button").on("click", "#add-input", function (event) {
         event.preventDefault();
         buttons.push($("#text-input").val().trim());
         renderButtons();
     });
-
 
 })

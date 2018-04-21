@@ -47,19 +47,19 @@ body {
     border-bottom: 1px solid gray;
 }
 
+.make-center{
+    margin:0 auto; 
+}
+
+.card-header {
+    color: #ffffff;
+    background: #4188ff;
+    width: 100%;
+    font-family: 'Hi Melody', cursive;
+}
 h1,h2,h3 {
     font-family: 'Hi Melody', cursive;
 }
-.gifs-item {
-    /* position: relative; */
-    
-  }
-/* .buttons button {
-    height:auto;
-    color: #334455;
-    font-size:20px;
-    background-color:#daccdb;
-} */
 
 /* Connect with me row */
 .connect-row {
