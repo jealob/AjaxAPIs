@@ -158,7 +158,8 @@ $(document).ready(function () {
     // add new buttons "on click" call back event handler
     $(".add-button").on("click", "#add-input", function (event) {
         event.preventDefault();
-        buttons.push($("#text-input").val().trim());
+        let newWord = $("#text-input").val().trim();
+        buttons.push(newWord.charAt(0).toUpperCase() + newWord.toLowerCase().slice(1));
         renderButtons();
     });
 })
